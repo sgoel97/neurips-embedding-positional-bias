@@ -7,7 +7,6 @@ from tqdm.auto import tqdm
 
 from utils.file_utils import read_data, write_data
 
-# DATASET_DIR = Path("./text-faithfulness/project/_models/openai")
 DATASET_DIR = Path("_models/openai")
 
 

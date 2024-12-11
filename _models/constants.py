@@ -49,32 +49,3 @@ huggingface_encoder_local_models = [
 ]
 huggingface_encoder_models = huggingface_encoder_remote_models + huggingface_encoder_local_models
 huggingface_models = huggingface_decoder_models + huggingface_encoder_models
-
-
-def get_model_and_tokenizer_names(model_name: str) -> tuple[str, str]:
-    """
-    Returns (tokenizer_name, model_name)
-    Most should be the same, with just a few having exceptions
-    Predefined list of model names with their corresponding tokenizer names
-    """
-    model_mapping: dict[str, str] = {
-        "mosaicml/mosaic-bert-base-seqlen-1024": "bert-base-uncased",
-    }
-
-    # Check if the model name is in the list and return the corresponding names
-    if model_name in model_mapping:
-        return (model_mapping[model_name], model_name)
-
-    # If the model name is not found, return the name itself
-    return (model_name, model_name)
-
-
-def get_config(model_name: str) -> transformers.PretrainedConfig | None:
-    mapping: dict[str, transformers.PretrainedConfig] = {
-        "mosaicml/mosaic-bert-base-seqlen-1024": transformers.BertConfig.from_pretrained(
-            "mosaicml/mosaic-bert-base-seqlen-1024"
-        )
-    }
-    if model_name in mapping:
-        return mapping[model_name]
-    return None
