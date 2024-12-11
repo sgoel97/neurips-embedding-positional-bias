@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def prepare_dataset(name: str, dataset: pd.DataFrame):
+def prepare_dataset(name: str, dataset: pd.DataFrame) -> pd.DataFrame:
     if "scientific_papers" in name:
         return pd.DataFrame({"original": dataset["abstract"]})
     if "paul_graham" in name:
