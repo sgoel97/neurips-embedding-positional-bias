@@ -20,6 +20,7 @@ class RegressionExperiment:
         self.exp_name = exp_name
 
         datasets = []
+        self.dataset_paths = dataset_paths
         for dataset_path in dataset_paths:
             assert Path(dataset_path).exists(), f"{dataset_path} does not exist"
             datasets.append(pd.read_pickle(dataset_path))
@@ -128,29 +129,18 @@ class RegressionExperiment:
             axis=1,
         )
 
-        if "sentence_embeddings" in df_columns and "embeddings_shuffled" in df_columns:
+        if "sentence_embeddings_shuffled" in df_columns and "embeddings_shuffled" in df_columns:
             df["shuffled_r2"] = df.apply(
-                lambda x: get_r2(x["sentence_embeddings"], x["embeddings_shuffled"]),
+                lambda x: get_r2(x["sentence_embeddings_shuffled"], x["embeddings_shuffled"]),
                 axis=1,
             )
 
             df["shuffled_regression_coefs"] = df.apply(
-                lambda x: get_regression_coefs(x["sentence_embeddings"], x["embeddings_shuffled"]),
+                lambda x: get_regression_coefs(
+                    x["sentence_embeddings_shuffled"], x["embeddings_shuffled"]
+                ),
                 axis=1,
             )
-
-        # if "sentence_embeddings_shuffled" in df_columns and "embeddings_original" in df_columns:
-        #     df["shuffled_r2"] = df.apply(
-        #         lambda x: get_r2(x["sentence_embeddings_shuffled"], x["embeddings_original"]),
-        #         axis=1,
-        #     )
-
-        #     df["shuffled_regression_coefs"] = df.apply(
-        #         lambda x: get_regression_coefs(
-        #             x["sentence_embeddings_shuffled"], x["embeddings_original"]
-        #         ),
-        #         axis=1,
-        #     )
 
         return df
 

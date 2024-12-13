@@ -3,6 +3,7 @@ import inspect
 from typing import Literal
 from tqdm.auto import tqdm
 from pathlib import Path
+import pandas as pd
 
 from needle_config import NeedleConfig
 from _models.model import get_embedding_func_batched
@@ -33,11 +34,11 @@ class NeedleExperiment:
         self.df = self.dataset_config.get_dataset(True, max_length)
         assert "original" in self.df.columns
         original_text = self.df["original"].tolist()
-        sentences = get_sentences(original_text)
+        sentences = pd.Series(get_sentences(original_text))
         self.df["sentences"] = sentences
-        self.df["sentence_positions"] = self.df["sentences"].apply(get_sentence_positions)
-        self.df["sentence_proportions"] = self.df["sentences"].apply(get_sentence_proportions)
-        self.df["num_sentences"] = self.df["sentences"].apply(len)
+        self.df["sentence_positions"] = sentences.apply(get_sentence_positions)
+        self.df["sentence_proportions"] = sentences.apply(get_sentence_proportions)
+        self.df["num_sentences"] = sentences.apply(len)
         print(f"Dataset {dataset_name} loaded in mode '{mode}'.")
 
         # Truncate dataset examples to max_text_size
@@ -95,7 +96,13 @@ class NeedleExperiment:
         self.df["embeddings_original"] = embedding_func(prompts=original_text, **kwargs)
 
         shuffled_text = shuffle_text(original_text, spacing=False)
+        self.df["original_shuffled"] = shuffled_text
         self.df["embeddings_shuffled"] = embedding_func(shuffled_text, **kwargs)
+
+        sentences = pd.Series(get_sentences(shuffled_text))
+        self.df["sentences_shuffled"] = sentences
+        self.df["sentence_positions_shuffled"] = sentences.apply(get_sentence_positions)
+        self.df["sentence_proportions_shuffled"] = sentences.apply(get_sentence_proportions)
 
         # Generate embeddings for each modified text column.
         for config in tqdm(self.needle_configs, desc="embedding needle text"):
@@ -116,6 +123,13 @@ class NeedleExperiment:
             sentence_embedding = embedding_func(prompts=sentences, **kwargs)
             sentence_embeddings.append(sentence_embedding)
         self.df["sentence_embeddings"] = sentence_embeddings
+
+        sentence_embeddings_shuffled = []
+        for i in tqdm(range(len(self.df)), desc="embedding shuffled sentences"):
+            sentences_shuffled = self.df["sentences_shuffled"][i]
+            sentence_embedding_shuffled = embedding_func(prompts=sentences_shuffled, **kwargs)
+            sentence_embeddings_shuffled.append(sentence_embedding_shuffled)
+        self.df["sentence_embeddings_shuffled"] = sentence_embeddings_shuffled
 
     def calculate_similarities(self):
         original_text_embeddings = torch.tensor(self.df["embeddings_original"].tolist()).to("cpu")
