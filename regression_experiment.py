@@ -122,22 +122,29 @@ class RegressionExperiment:
         # Compute R² and regression coefficients for the original and shuffled embeddings
         assert "sentence_embeddings" in df_columns and "embeddings_original" in df_columns
         df["r2"] = df.apply(
-            lambda x: get_r2(x["sentence_embeddings"], x["embeddings_original"]), axis=1
+            lambda x: get_r2(
+                x["sentence_embeddings"], x["embeddings_original"], fit_intercept=False
+            ),
+            axis=1,
         )
         df["regression_coefs"] = df.apply(
-            lambda x: get_regression_coefs(x["sentence_embeddings"], x["embeddings_original"]),
+            lambda x: get_regression_coefs(
+                x["sentence_embeddings"], x["embeddings_original"], fit_intercept=False
+            ),
             axis=1,
         )
 
         if "sentence_embeddings_shuffled" in df_columns and "embeddings_shuffled" in df_columns:
             df["shuffled_r2"] = df.apply(
-                lambda x: get_r2(x["sentence_embeddings_shuffled"], x["embeddings_shuffled"]),
+                lambda x: get_r2(
+                    x["sentence_embeddings_shuffled"], x["embeddings_shuffled"], fit_intercept=False
+                ),
                 axis=1,
             )
 
             df["shuffled_regression_coefs"] = df.apply(
                 lambda x: get_regression_coefs(
-                    x["sentence_embeddings_shuffled"], x["embeddings_shuffled"]
+                    x["sentence_embeddings_shuffled"], x["embeddings_shuffled"], fit_intercept=False
                 ),
                 axis=1,
             )
